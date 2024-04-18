@@ -152,16 +152,6 @@
 		</pluginManagement>
 	</build>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>42.2.23</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<profiles>
 		<profile>
 			<id>check</id>

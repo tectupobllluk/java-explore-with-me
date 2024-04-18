@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode
 @Table(name = "endpoint_hit")
 @Entity
 public class EndpointHit {

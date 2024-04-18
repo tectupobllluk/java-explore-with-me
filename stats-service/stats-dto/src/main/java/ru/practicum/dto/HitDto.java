@@ -12,9 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 public class HitDto {
     @NotBlank(message = "URI must not be blank")
     private String uri;

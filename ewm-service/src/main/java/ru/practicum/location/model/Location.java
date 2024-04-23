@@ -4,7 +4,8 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,9 +16,7 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "lat", nullable = false)
-    @EqualsAndHashCode.Exclude
     private Float lat;
     @Column(name = "lon", nullable = false)
-    @EqualsAndHashCode.Exclude
     private Float lon;
 }

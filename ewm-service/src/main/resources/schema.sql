@@ -20,7 +20,7 @@ create table if not exists events (
     annotation VARCHAR(2000) NOT NULL,
     title VARCHAR(120) NOT NULL,
     confirmed_request BIGINT,
-    created_on TIMESTAMP WITHOUT TIME ZONE,
+    created_on TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     published_on TIMESTAMP WITHOUT TIME ZONE,
     event_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     description VARCHAR(7000) NOT NULL,

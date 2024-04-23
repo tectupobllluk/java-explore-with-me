@@ -11,7 +11,8 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -43,18 +44,12 @@ public class Event {
     private String description;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "initiator_id", nullable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private User initiator;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Category category;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Location location;
     @Column(name = "paid")
     private Boolean paid = false;

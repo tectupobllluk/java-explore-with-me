@@ -3,6 +3,7 @@ package ru.practicum.events.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.practicum.StatsHttpClient;
@@ -142,10 +143,9 @@ public class EventServiceImpl implements EventService {
 
         for (Request request : requests) {
             if (requestDto.getStatus().equals(Status.CONFIRMED)) {
-                if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
-                    request.setStatus(Status.CONFIRMED);
-                    confirmedRequests.add(RequestMapper.toRequestDto(request));
-                } else if (event.getConfirmedRequests() < event.getParticipantLimit()) {
+                if (event.getParticipantLimit() == 0 ||
+                        !event.getRequestModeration() ||
+                        event.getConfirmedRequests() < event.getParticipantLimit()) {
                     request.setStatus(Status.CONFIRMED);
                     event.setConfirmedRequests(event.getConfirmedRequests() + 1);
                     confirmedRequests.add(RequestMapper.toRequestDto(request));
@@ -172,10 +172,8 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> getEventsByAdmin(List<Long> users, List<String> states,
                                                List<Long> categories, LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                                Integer from, Integer size) {
-        if (rangeStart != null && rangeEnd != null) {
-            if (rangeStart.isAfter(rangeEnd)) {
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
                 throw new ConflictException("Start time can't be after End time");
-            }
         }
 
         Pageable pageable = PageRequest.of(from / size, size);
@@ -249,13 +247,30 @@ public class EventServiceImpl implements EventService {
         if (endTime != null && Objects.requireNonNull(startTime).isAfter(endTime)) {
             throw new DataValidationException("Start time can't be after End time");
         }
-        PageRequest pageRequest = PageRequest.of(from / size, size);
-        List<Event> events = eventsRepository.findEventsByPublicFromParam(
-                text, categories, paid, startTime, endTime, onlyAvailable, sort, pageRequest);
-
-        for (Event event : events) {
-            event.setViews(getEventViewsById(event));
+        Pageable page = null;
+        switch (sort) {
+            case "EVENT_DATE":
+                page = PageRequest.of(from / size, size, Sort.Direction.ASC, "eventDate");
+                break;
+            case "VIEWS":
+                page = PageRequest.of(from / size, size, Sort.Direction.ASC, "views");
+                break;
         }
+        List<Event> events = eventsRepository.findEventsByPublicFromParam(
+                text, categories, paid, startTime, endTime, onlyAvailable, sort, page);
+
+        List<String> eventsUri = events.stream()
+                .map(event -> "/events/" + event.getId())
+                .collect(Collectors.toList());
+
+        List<StatsDto> eventsRequests = statsClient.getStatistics(startTime,
+                LocalDateTime.now(), eventsUri, true);
+
+        events.forEach(e -> eventsRequests.stream()
+                    .filter(eventRequests -> Long.valueOf(eventRequests.getUri().substring(8)).equals(e.getId()))
+                    .map(StatsDto::getHits)
+                    .findFirst().ifPresent(e::setViews));
+
         eventsRepository.saveAll(events);
 
         return events.stream()
@@ -322,8 +337,8 @@ public class EventServiceImpl implements EventService {
     private Long getEventViewsById(Event event) {
         if (event.getId() != null) {
             List<StatsDto> eventRequests = statsClient.getStatistics(
-                    LocalDateTime.now().minusYears(1),
-                    LocalDateTime.now().plusYears(1),
+                    event.getPublishedOn(),
+                    LocalDateTime.now(),
                     List.of("/events/" + event.getId()),
                     true);
 

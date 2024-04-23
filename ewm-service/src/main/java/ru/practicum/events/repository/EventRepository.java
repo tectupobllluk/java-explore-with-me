@@ -36,8 +36,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "or (cast(?4 as date) is null and e.eventDate < cast(?5 as date)) " +
             "or (cast(?5 as date) is null and e.eventDate > cast(?4 as date)) " +
             "and (e.confirmedRequests < e.participantLimit or ?6 = false) " +
-            "group by e.id " +
-            "order by lower(?7) asc")
+            "group by e.id")
     List<Event> findEventsByPublicFromParam(String text, List<Long> categories, Boolean paid,
                                             LocalDateTime startTime, LocalDateTime endTime,
                                             Boolean onlyAvailable, String sort, Pageable page);

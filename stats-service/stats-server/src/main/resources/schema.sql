@@ -3,5 +3,5 @@ create table if not exists endpoint_hit (
   app VARCHAR NOT NULL,
   uri VARCHAR NOT NULL,
   ip VARCHAR(15) NOT NULL,
-  timestamp TIMESTAMP WITHOUT TIME ZONE NOT NULL
+  time_stamp TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
